@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>== vs === — The JavaScript (JS) Magic Show</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color-scheme: light; }
+  body { margin: 2rem; max-width: 900px; line-height: 1.45; }
+  header { display:flex; gap:1rem; align-items:center; }
+  h1 { margin: 0 0 .25rem 0; font-size: 1.4rem; color: #114B23; } /* forest green vibe */
+  p.lead { margin:0 0 1rem 0; color: #333; }
+  table { width:100%; border-collapse: collapse; margin-top: 1rem; }
+  th, td { padding: .5rem .6rem; border: 1px solid #ddd; text-align: left; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; }
+  th { background: #f6f9f6; color: #0b3; } /* subtle theme */
+  button.run { background: #0b6623; color: white; border: 0; padding: .4rem .6rem; border-radius: 6px; cursor: pointer; }
+  button.run:hover { filter: brightness(.95); }
+  .result.loose { font-weight: 700; color: #ff4e18; } /* orange for danger */
+  .result.strict { font-weight: 700; color: #05a44c; } /* green for safety */
+  .explain { font-size: .9rem; color: #444; }
+  .foot { margin-top: 1rem; font-size: .9rem; color: #555; }
+  .predict { font-style: italic; color: #666; font-size: .9rem; }
+</style>
+</head>
+<body>
+
+
+  <div class="foot">
+    Quick TL;DR: <strong>Always use <code>===</code> unless you have a very specific reason otherwise</strong>. Loose equality coerces types, and coercion is an evil mean sin for evil mean people.
+  </div>
+
+  <table id="cases">
+    <thead>
+      <tr>
+        <th>Expression (left vs right)</th>
+        <th>Loose (<code>==</code>)</th>
+        <th>Strict (<code>===</code>)</th>
+        <th style="width:40%">Why it's weird</th>
+        <th>Run</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+
+<script>
+(() => {
+  // Test cases (left and right are raw JS source snippets)
+  const tests = [
+    { left: '0', right: '"0"', note: 'number vs string' },
+    { left: '0', right: '[]', note: 'number vs empty array' },
+    { left: '[]', right: '""', note: 'empty array coerces to empty string' },
+    { left: '[]', right: '![]', note: 'empty array vs not-empty-array (boolean coercion trick)' },
+    { left: 'null', right: 'undefined', note: 'null and undefined are loosely equal (but different types)' },
+    { left: '[0]', right: '0', note: 'array with single number coerces to string "0" → number 0' },
+    { left: 'new String("0")', right: '0', note: 'String object vs number: object gets coerced' },
+    { left: 'NaN', right: 'NaN', note: 'NaN is never equal to itself' }
+  ];
+
+  const tbody = document.querySelector('#cases tbody');
+
+  function safeEval(expr) {
+    try {
+      // Use Function so "return (<expr>)" executes in module-global scope safely for demo.
+      return Function('return (' + expr + ')')();
+    } catch (e) {
+      return 'Error: ' + String(e);
+    }
+  }
+
+  function explain(left, right) {
+    // Minimal, accurate explanations for the demo (keep readable)
+    if (left === '0' && right === '"0"')
+      return 'Loose: string "0" coerces to number 0 → true. Strict: different types (number vs string) → false.';
+    if (left === '0' && right === '[]')
+      return '[] becomes "" then Number("") → 0, so 0 == 0 → true. === is false because types differ (number vs object).';
+    if (left === '[]' && right === '""')
+      return '[] → "" when coerced, so loose equality matches. Still different types for === (object vs string).';
+    if (left === '[]' && right === '![]')
+      return '![] is false; [] coerces to "" then to 0; false coerces to 0 → both 0 → true. Surprise!';
+    if (left === 'null' && right === 'undefined')
+      return 'null and undefined are special-cased to be loosely equal. With === they are not equal (different types).';
+    if (left === '[0]' && right === '0')
+      return '[0] → "0" → Number("0") → 0. Loose equality coerces containers; === is false (object vs number).';
+    if (left === 'new String("0")' && right === '0')
+      return 'new String("0") is an object; it becomes primitive "0", then Number("0") → 0. Loose true, strict false.';
+    if (left === 'NaN' && right === 'NaN')
+      return 'NaN is never equal to itself. Both == and === return false. Use Number.isNaN() to check for NaN.';
+    return 'Type coercion rules (ToPrimitive, then ToNumber/string) can produce surprising matches; prefer === for clarity.';
+  }
+
+  tests.forEach(test => {
+    const tr = document.createElement('tr');
+    const exprCell = document.createElement('td');
+    exprCell.innerHTML = `<code>${test.left}</code>  <strong>vs</strong>  <code>${test.right}</code><div class="predict">(${test.note})</div>`;
+    const looseCell = document.createElement('td');
+    looseCell.className = 'result loose';
+    looseCell.textContent = '—';
+    const strictCell = document.createElement('td');
+    strictCell.className = 'result strict';
+    strictCell.textContent = '—';
+    const explainCell = document.createElement('td');
+    explainCell.className = 'explain';
+    explainCell.textContent = '';
+    const runCell = document.createElement('td');
+    runCell.innerHTML = `<button class="run">Run</button>`;
+
+    tr.append(exprCell, looseCell, strictCell, explainCell, runCell);
+    tbody.appendChild(tr);
+
+    runCell.querySelector('button').addEventListener('click', () => {
+      const left = test.left, right = test.right;
+      const looseExpr = `${left} == ${right}`;
+      const strictExpr = `${left} === ${right}`;
+      const loose = safeEval(looseExpr);
+      const strict = safeEval(strictExpr);
+      looseCell.textContent = String(loose);
+      strictCell.textContent = String(strict);
+      explainCell.textContent = explain(left, right);
+
+      // tiny visual flare
+      tr.animate([
+        { background: '#fff7ed' }, { background: '#ffffff' }
+      ], { duration: 500 });
+    });
+  });
+
+  // Bonus: clickable console quickies
+  const foot = document.createElement('p');
+  foot.className = 'foot';
+  foot.innerHTML = `<strong>Console quickies</strong>: Open DevTools (F12) and paste:
+  <pre>
+console.log(0 == "0");       // true
+console.log(0 === "0");      // false
+console.log([] == ![]);      // true  — stare into the void
+console.log(null == undefined); // true
+console.log(NaN == NaN, NaN === NaN); // false false
+  </pre>`;
+  document.body.appendChild(foot);
+})();
+</script>
+</body>
+</html>
