@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 3A Demo Exercises - Live Coding</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+      border-bottom: 3px solid #007acc;
+      padding-bottom: 10px;
+    }
+    
+    #output {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin: 20px 0;
+      min-height: 100px;
+      border-left: 4px solid #007acc;
+    }
+    
+    .success {
+      border-left-color: #28a745;
+      background-color: #e8f5e8;
+    }
+    
+    .error {
+      border-left-color: #dc3545;
+      background-color: #f8d7da;
+    }
+    
+    .info {
+      color: #666;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h1>Week 3A Live Coding Exercises</h1>
+  <p class="info">Use the browser console and this output div to demonstrate concepts interactively with students.</p>
+  
+  <div id="output">
+    <p><strong>Output will appear here...</strong></p>
+  </div>
+
+  <script>
+    // Show the difference between old-style for loops and modern array.map()
+    
+    const colors = ['red', 'green', 'blue', 'purple', 'orange'];
+    
+    // DEMO 1A: Old way (for loop + string concatenation)
+    let html = '';
+    
+    // DEMO 1B: Modern way (array.map + template strings + Array.join)
+    
+    
+    
+    
+    // Exercise 2: Array Destructuring
+    // Show how to extract values from arrays cleanly
+    
+    const students = ['Alice', 'Bob', 'Charlie', 'Diana'];
+    
+    // DEMO 2A: Traditional way
+    const first = students[0];
+    const second = students[1];
+    
+    // DEMO 2B: Destructuring way - TODO: implement this
+    
+    // DEMO 2C: Skipping elements - TODO: implement this
+    
+    // DEMO 2D: Show results
+    // showOutput(`Traditional: ${first}, ${second}`);
+    
+    
+    // Exercise 3: JSON Parsing with Error Handling
+    // Demonstrate JSON.parse() with try/catch
+    
+    const goodJSON = '{"name": "Alice", "age": 25, "hobbies": ["reading", "coding"]}';
+    const badJSON = '{name: "Alice", age: 25}'; // Invalid - missing quotes around keys
+    
+    // DEMO 3A: Parse valid JSON - TODO: implement with try/catch
+    
+    // DEMO 3B: Parse invalid JSON - TODO: implement with try/catch
+    
+    
+    // Exercise 4: Fetch API Introduction  
+    // Show modern promise-based data loading
+    
+    const sampleURL = 'https://jsonplaceholder.typicode.com/users/1';
+    
+    // DEMO 4A: Basic fetch pattern - TODO: implement fetch with .then()
+    
+    // DEMO 4B: Handle fetch errors - TODO: implement error handling
+    
+    
+    // Exercise 5: ES6 Modules (Conceptual)
+    // Prepare students for modular code organization
+    
+    // DEMO 5A: What utils.js would look like:
+    const randomElement = (array) => {
+      return array[Math.floor(Math.random() * array.length)];
+    };
+
+    const formatName = (first, last) => {
+      return `${last}, ${first}`;
+    };
+    
+    // DEMO 5B: Show how these would be exported/imported
+    // TODO: explain export/import syntax
+    
+    // DEMO 5C: Test our utility functions
+    const testArray = ['apple', 'banana', 'cherry'];
+    // showOutput(`Random element: ${randomElement(testArray)}`);
+    // showOutput(`Formatted name: ${formatName('John', 'Doe')}`);
+    
+
+    
+    // Helper function to display results nicely
+    function showOutput(content, type = 'info') {
+      const output = document.querySelector('#output');
+      output.innerHTML = content;
+      output.className = type; // 'success', 'error', or 'info'
+    }
+    
+  </script>
+</body>
+</html>
